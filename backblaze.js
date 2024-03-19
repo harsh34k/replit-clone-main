@@ -152,6 +152,7 @@ const copyBaseFilesFromBlackBlaze = async (submittedValue, replitName) => {
         console.log(BLACKBLAZE_DESTINATION_KEYID, BLACKBLAZE_DESTINATION_APPLICATION_KEY);
         console.log("replitName1", replitName);
         await b2.authorize()
+        console.log("hi");
         await downloadFilesAndReupload(replitName, submittedValue)
         // return true;
 
@@ -173,8 +174,9 @@ async function downloadFilesAndReupload(replitName, submittedValue) {
             prefix: `${replitName}/`,
         });
 
+
         if (filesinb2.data.files.length > 0) {
-            // console.log(`Folder '${folderName}' already exists.`);
+            console.log(`Folder '${folderName}' already exists.`);
             // return await getAllFilesFromReplitNameFolder(b2, replitName)
             return;
         }
@@ -184,6 +186,7 @@ async function downloadFilesAndReupload(replitName, submittedValue) {
             bucketId: BLACKBLAZE_HARSH_BUCKETID,
             prefix: `${submittedValue}/`,
         });
+        console.log("filesinb2", files.data.files);
 
         // console.log(" files from download and reupload", files.data.files);
         // Iterate through the list of files
@@ -192,14 +195,14 @@ async function downloadFilesAndReupload(replitName, submittedValue) {
             // console.log("control here");
             // console.log("b2Bucket2,", b2Bucket2);
             // const fileInfo = await b2Bucket2.getFileInfo({ fileId: file.fileId })
-            // console.log("fileInfo", fileInfo);
+            console.log("filesiterating", file);
             const filePath = file.fileName
             const parts = filePath.split('/');
             const fileName = parts[parts.length - 1];
             const fileData = await b2Bucket2.downloadFileById({
                 fileId: file.fileId,
             });
-            // console.log("filedata", fileData.data);
+            console.log("filedata", fileData.data);
 
             // Write the downloaded file to local disk
             fs.writeFileSync(`./public/node/${fileName}`, fileData.data);
@@ -230,7 +233,7 @@ async function downloadFilesAndReupload(replitName, submittedValue) {
             })
             // await getAllFilesFromReplitNameFolder(b2, replitName)
             console.log(`File '${file.fileName}' uploaded to '${replitName}' successfully.`);
-            return;
+
 
 
         }
@@ -239,11 +242,13 @@ async function downloadFilesAndReupload(replitName, submittedValue) {
     }
 }
 
-const getAllFilesFromReplitNameFolder = async (bucket, folderName) => {
+const getAllFilesFromReplitNameFolder = async (folderName) => {
+    const bucket = b2;
     const files = await bucket.listFileNames({
         bucketId: BLACKBLAZE_DESTINATION_BUCKETID,
         prefix: `${folderName}/`,
     });
+    console.log("files", files.data.files);
     fs.mkdirSync(`./public/${folderName}`, { recursive: true });
     console.log('Directory created successfully.');
     for (const file of files.data.files) {
